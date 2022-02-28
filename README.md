@@ -19,6 +19,7 @@
     
     c. Practical and theoretical (if any) results
     
+        - State space being reachable?
     d. reworking the intro to get rid of some fluff, 
     
 3. expanding related literature section, 

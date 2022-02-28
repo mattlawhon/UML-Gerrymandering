@@ -4,12 +4,14 @@
 
     a. Work through nan issues in computation of different metrics
     
-        i. Analyze maps that yield nan values
-        ii. Reimplement anything in the base redist package?
+    - [x] Analyze maps that yield nan values
+    - [x] Reimplement anything in the base redist package? (not neeeded it appears)
         
     b. Confidence intervals for kl divergence metrics, kde density estimation
     
-        i. Discrete kl divergence function?
+    - [ ] Succeed in implementing a discrete KL approximation (completely unstable for now)
+    - [ ] Or: compute confidence interval from KDE density estimation
+        
 2. getting more technical in the discussion of our algorithm and thinking about how we can beef that up, 
 
     a. Improve python code via any optimizations possible
@@ -20,7 +22,7 @@
     c. Practical and theoretical (if any) results
     
         - State space being reachable?
-    d. reworking the intro to get rid of some fluff, 
+    - [ ] reworking the intro to get rid of some fluff, 
     
 3. expanding related literature section, 
 
@@ -28,7 +30,7 @@
 
 5. EAAMO Specifics
 
-    a. Read through formatting and citation guidelines and implement them
+    - [ ] Read through formatting and citation guidelines and implement them
     
-    b. Read through past years papers to guide relevant editing and problem motivation
+    - [ ] Read through past years papers to guide relevant editing and problem motivation
     

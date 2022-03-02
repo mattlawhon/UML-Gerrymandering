@@ -21,9 +21,11 @@
     
     b. Write in algorithmic package and provide algorithm runtime
     
+    - [ ] Add comments
+    
     c. Practical and theoretical (if any) results
     
-        - State space being reachable?
+    - [ ] State space being reachable?
     - [ ] reworking the intro to get rid of some fluff, 
     
 3. expanding related literature section, 

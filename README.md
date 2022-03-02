@@ -16,7 +16,8 @@
 
     a. Improve python code via any optimizations possible
     
-    - [ ] Optimize dissimilarity matrix computation (vectorization or memorizing the matrix)
+    - [ ] Optimize dissimilarity matrix computation (vectorization or in-place modification)
+    - [ ] Find a way to remove the deepcopies at each step
     
     b. Write in algorithmic package and provide algorithm runtime
     

@@ -16,7 +16,8 @@
 
     a. Improve python code via any optimizations possible
     
-        - Optimization ideas go here
+    - [ ] Optimize dissimilarity matrix computation (vectorization or memorizing the matrix)
+    
     b. Write in algorithmic package and provide algorithm runtime
     
     c. Practical and theoretical (if any) results

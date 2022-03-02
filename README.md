@@ -24,6 +24,7 @@
     b. Write in algorithmic package and provide algorithm runtime
     
     - [ ] Add comments
+    - [ ] Add the possibility to specify the thresholding value as an experiment parameter
     
     c. Practical and theoretical (if any) results
     

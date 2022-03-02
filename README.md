@@ -18,6 +18,7 @@
     
     - [ ] Optimize dissimilarity matrix computation (vectorization or in-place modification)
     - [ ] Find a way to remove the deepcopies at each step
+    - [ ] Maybe using Disjoint-Set datastructre?
     
     b. Write in algorithmic package and provide algorithm runtime
     

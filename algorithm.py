@@ -90,36 +90,39 @@ def merge_cluster(n1, n2, G, vap_list, cluster_ct, cluster_dict):
     return cluster_ct, new_G, new_vap_list, new_cluster_dict
 
 
-def check_valid(vap_list, target_districts):
-    T = np.sum(vap_list) / target_districts
-    for val in vap_list:
-        diff = abs(val - T)
+def check_valid(cluster_dict, target_districts):
+    T = sum(data[1] for data in cluster_dict.values()) / target_districts
+    for _, pop in cluster_dict.values():
+        diff = abs(pop - T)
         percent = diff / T
         if (percent > 0.25):
             return False
     return True
 
 
-def recursive_clustering(cluster_dict, cluster_ct, G, vap_list, target_districts, attempt_limit, start_time):
+def recursive_clustering(cluster_dict, cluster_ct, G, target_districts, attempt_limit, start_time):
     # base case, checks if final clustering is valid
     if (cluster_ct <= target_districts):
-        return cluster_dict, check_valid(vap_list, target_districts)
+        return cluster_dict, check_valid(cluster_dict, target_districts)
 
     # Retrieves dissimalrity matrix, checks if further clustering is impossible
-    dissim, end_early = get_dissim(cluster_ct, G, vap_list, target_districts)
+    dissim, end_early = get_dissim(cluster_ct, G, cluster_dict, target_districts)
     if (end_early):
         return cluster_dict, False
 
     # Makes copies to save old values
+    """
     old_G = copy.deepcopy(G)
     old_vap_list = copy.deepcopy(vap_list)
     old_cluster_ct = copy.deepcopy(cluster_ct)
     old_cluster_dict = copy.deepcopy(cluster_dict)
+    """
     tried_pairs = []
 
     # Selects one pair to merge and merges them, adds it to tried merges
     row_num, col_num = get_merged_row_col(dissim)
-    cluster_ct, G, vap_list, new_cluster_dict = merge_cluster(row_num, col_num, G, vap_list, cluster_ct, cluster_dict)
+    i, j = # TODO: get names from row_num col_num
+    G, data_i, data_j = merge(i, j, G, cluster_dict)
     attempt_ct = 0
     tried_pairs.append((row_num, col_num))
 
@@ -129,15 +132,17 @@ def recursive_clustering(cluster_dict, cluster_ct, G, vap_list, target_districts
     while (attempt_ct < attempt_limit):
         curr_time = time.time()
         if curr_time > start_time + 10:
-            return new_cluster_dict, False
+            return cluster_dict, False
 
         # Recursively runs the next pair to merge, if base case is valid clustering, returns true
-        new_cluster_dict, val = recursive_clustering(new_cluster_dict, cluster_ct, G, vap_list, target_districts,
+        new_cluster_dict, val = recursive_clustering(cluster_dict, cluster_ct, G, target_districts,
                                                      attempt_limit, start_time)
         if (val):
             return new_cluster_dict, True
 
         attempt_ct = attempt_ct + 1
+
+
 
         # Since the last attempt led to a failed clustering, let's pick a new merge at the current level
         row_num, col_num = get_merged_row_col(dissim)

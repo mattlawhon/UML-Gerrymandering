@@ -5,6 +5,9 @@ import time
 import copy
 import math
 import sys
+import cProfile
+import pstats
+from pstats import SortKey
 
 
 def get_dissim(cluster_ct, G, vap_list, target_districts):
@@ -20,7 +23,7 @@ def get_dissim(cluster_ct, G, vap_list, target_districts):
                 if(vap_list[i] + vap_list[j] >= 1.25*T):
                     dissim[i][j] = 0
                 if(dissim[i][j] < 0):
-                    dissim[i][j] = T/(-1*dissim[i][j]) 
+                    dissim[i][j] = T/(-1*dissim[i][j])
                 '''
                 if(dissim[i][j] > 0 and dissim[i][j] < min_pos):
                     min_pos = dissim[i][j]
@@ -54,6 +57,10 @@ def get_merged_row_col(dissim):
     row_num, col_num = divmod(val[0], len(dissim))
     return row_num, col_num
 
+def merge(i, j, G, cluster_dict):
+    neighbors_i = G[i]
+    neighbors_j = G[j]
+
 
 def merge_cluster(n1, n2, G, vap_list, cluster_ct, cluster_dict):
     cluster_ct -= 1
@@ -83,7 +90,7 @@ def merge_cluster(n1, n2, G, vap_list, cluster_ct, cluster_dict):
     return cluster_ct, new_G, new_vap_list, new_cluster_dict
 
 
-def check_valid(vap_list):
+def check_valid(vap_list, target_districts):
     T = np.sum(vap_list)/target_districts
     for val in vap_list:
         diff = abs(val - T)
@@ -97,7 +104,7 @@ def recursive_clustering(cluster_dict, cluster_ct, G, vap_list, target_districts
 
     #base case, checks if final clustering is valid
     if(cluster_ct <= target_districts):
-        return cluster_dict, check_valid(vap_list)
+        return cluster_dict, check_valid(vap_list, target_districts)
 
     #Retrieves dissimalrity matrix, checks if further clustering is impossible
     dissim, end_early = get_dissim(cluster_ct, G, vap_list, target_districts)
@@ -180,51 +187,56 @@ def write_dict_to_file(sample_list, writer):
 
 # files = ['data/fl25', 'data/fl70', 'data/fl250', 'data/iowa']
 # vap for iowa = 7, t_d = 4
-files = ['data/iowa']
-total_samples = 10
-valid_ct = 0.0
-writer = None
-sample_list = []
-pop_column = 1
-target_districts = 4
-for file in files:
-    if(file == 'data/iowa'):
-        pop_column = 3
-    if(file == 'data/fl70' or file == 'data/fl250'):
-        target_districts = 27
+def main():
+    files = ['data/iowa']
+    total_samples = 1
+    valid_ct = 0.0
+    writer = None
+    sample_list = []
+    pop_column = 1
+    target_districts = 4
+    for file in files:
+        if(file == 'data/iowa'):
+            pop_column = 3
+        if(file == 'data/fl70' or file == 'data/fl250'):
+            target_districts = 27
 
-    writer = open(file + "_" + str(total_samples) + '._results_post_update_2.txt', 'w+', encoding='utf-8')
-    for sample in range(total_samples):
-        G = nx.read_adjlist(file + ".adjlist")
+        writer = open(file + "_" + str(total_samples) + '._results_post_update_2.txt', 'w+', encoding='utf-8')
+        for sample in range(total_samples):
+            G = nx.read_adjlist(file + ".adjlist")
 
-        csvfile = open(file + '.csv', newline='')
-        reader = csv.reader(csvfile)
+            csvfile = open(file + '.csv', newline='')
+            reader = csv.reader(csvfile)
 
-        vap_list = []
-        vap_list = np.array(vap_list)
-        first = True
-        for row in reader:
-            if(first):
-                first = False
-                continue
-            vap_list = np.append(vap_list, int(row[pop_column]))
+            vap_list = []
+            vap_list = np.array(vap_list)
+            first = True
+            for row in reader:
+                if(first):
+                    first = False
+                    continue
+                vap_list = np.append(vap_list, int(row[pop_column]))
 
-        cluster_ct = len(vap_list)
-        orig_len = len(vap_list)
-        start_time = time.time()
+            cluster_ct = len(vap_list)
+            orig_len = len(vap_list)
+            start_time = time.time()
 
-        cluster_dict = {}
-        for i in range(orig_len):
-            cluster_dict[i] = [i]
+            cluster_dict = {}
+            for i in range(orig_len):
+                cluster_dict[i] = [i]
 
-        cluster_dict, val = recursive_clustering(
-            cluster_dict, cluster_ct, G, vap_list, target_districts, 10, start_time)
-        if(val):
-            valid_ct = valid_ct + 1
-            sample_list.append(cluster_dict)
+            cluster_dict, val = recursive_clustering(
+                cluster_dict, cluster_ct, G, vap_list, target_districts, 10, start_time)
+            if(val):
+                valid_ct = valid_ct + 1
+                sample_list.append(cluster_dict)
 
-        print(str((sample+1) * 100 / total_samples) + " % complete")
+            print(str((sample+1) * 100 / total_samples) + " % complete")
 
-write_dict_to_file(sample_list, writer)
-writer.close()
-print("Success rate: " + str(valid_ct/total_samples*100) + "%")
+    write_dict_to_file(sample_list, writer)
+    writer.close()
+    print("Success rate: " + str(valid_ct/total_samples*100) + "%")
+
+
+if __name__=="__main__":
+    main()

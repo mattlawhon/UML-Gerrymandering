@@ -54,6 +54,11 @@ def get_merged_row_col(dissim):
     row_num, col_num = divmod(val[0], len(dissim))
     return row_num, col_num
 
+def recovery(i,j,data_i,data_j,cluster_dict):
+    cluster_dict[i] = data_i
+    cluster_dict[j] = data_j
+    return cluster_dict
+
 
 def merge_cluster(n1, n2, G, vap_list, cluster_ct, cluster_dict):
     cluster_ct -= 1

@@ -19,9 +19,9 @@ def get_dissim(cluster_ct, G, vap_list, target_districts):
                 dissim[i][j] = T - (vap_list[i] + vap_list[j])
                 if(vap_list[i] + vap_list[j] >= 1.25*T):
                     dissim[i][j] = 0
-                if(dissim[i][j] < 0):
-                    dissim[i][j] = T/(-1*dissim[i][j]) 
-                '''
+                #if(dissim[i][j] < 0):
+                #    dissim[i][j] = T/(-1*dissim[i][j]) 
+                
                 if(dissim[i][j] > 0 and dissim[i][j] < min_pos):
                     min_pos = dissim[i][j]
                 if(dissim[i][j] < 0 and dissim[i][j] > max_neg):
@@ -37,7 +37,7 @@ def get_dissim(cluster_ct, G, vap_list, target_districts):
             if(dissim[i][j] < 0):
                 dissim[i][j] = -1.0*numerator/dissim[i][j]
                 #dissim[j][i] = dissim[i][j]
-    '''
+    
 
     if(np.sum(dissim) == 0):
         return dissim, True
@@ -122,7 +122,7 @@ def recursive_clustering(cluster_dict, cluster_ct, G, vap_list, target_districts
 
     while(attempt_ct < attempt_limit):
         curr_time = time.time()
-        if curr_time > start_time + 35:
+        if curr_time > start_time + 10:
             return new_cluster_dict, False
 
         #Recursively runs the next pair to merge, if base case is valid clustering, returns true
@@ -180,7 +180,7 @@ def write_dict_to_file(sample_list, writer):
 
 # files = ['data/fl25', 'data/fl70', 'data/fl250', 'data/iowa']
 # vap for iowa = 7, t_d = 4
-files = ['data/iowa']
+files = ['../data/iowa']
 total_samples = 10
 valid_ct = 0.0
 writer = None
@@ -188,9 +188,9 @@ sample_list = []
 pop_column = 1
 target_districts = 4
 for file in files:
-    if(file == 'data/iowa'):
+    if(file == '../data/iowa'):
         pop_column = 3
-    if(file == 'data/fl70' or file == 'data/fl250'):
+    if(file == '../data/fl70' or file == '../data/fl250'):
         target_districts = 27
 
     writer = open(file + "_" + str(total_samples) + '._results_post_update_2.txt', 'w+', encoding='utf-8')

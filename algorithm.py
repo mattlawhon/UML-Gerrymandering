@@ -5,9 +5,6 @@ import time
 import copy
 import math
 import sys
-import cProfile
-import pstats
-from pstats import SortKey
 
 
 def get_dissim(cluster_ct, G, vap_list, target_districts):
@@ -22,9 +19,9 @@ def get_dissim(cluster_ct, G, vap_list, target_districts):
                 dissim[i][j] = T - (vap_list[i] + vap_list[j])
                 if(vap_list[i] + vap_list[j] >= 1.25*T):
                     dissim[i][j] = 0
-                if(dissim[i][j] < 0):
-                    dissim[i][j] = T/(-1*dissim[i][j])
-                '''
+                #if(dissim[i][j] < 0):
+                #    dissim[i][j] = T/(-1*dissim[i][j])
+
                 if(dissim[i][j] > 0 and dissim[i][j] < min_pos):
                     min_pos = dissim[i][j]
                 if(dissim[i][j] < 0 and dissim[i][j] > max_neg):
@@ -40,7 +37,7 @@ def get_dissim(cluster_ct, G, vap_list, target_districts):
             if(dissim[i][j] < 0):
                 dissim[i][j] = -1.0*numerator/dissim[i][j]
                 #dissim[j][i] = dissim[i][j]
-    '''
+
 
     if(np.sum(dissim) == 0):
         return dissim, True
@@ -129,7 +126,7 @@ def recursive_clustering(cluster_dict, cluster_ct, G, vap_list, target_districts
 
     while(attempt_ct < attempt_limit):
         curr_time = time.time()
-        if curr_time > start_time + 35:
+        if curr_time > start_time + 10:
             return new_cluster_dict, False
 
         #Recursively runs the next pair to merge, if base case is valid clustering, returns true

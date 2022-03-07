@@ -8,8 +8,9 @@ import random
 
 N_CPU = 7
 
-random.seed(100)
-np.random.seed(100)
+random.seed(0)
+np.random.seed(0)
+
 
 def get_dissim(cluster_ct, G, cluster_dict, target_districts, node_indexing):
     vap_list = [cluster_dict[node][1] for node in node_indexing]
@@ -73,34 +74,6 @@ def merge(i, j, G, cluster_dict):
     return G, data_i, data_j
 
 
-def merge_cluster(n1, n2, G, vap_list, cluster_ct, cluster_dict):
-    cluster_ct -= 1
-    # n1 is kept, n2 is not kept
-    new_G = nx.contracted_edge(G, (str(n1), str(n2)), self_loops=False)
-    list_of_nodes = sorted(new_G)
-    mapping = {}
-    for node in list_of_nodes:
-        mapping[node] = node if int(node) < n2 else str(int(node) - 1)
-    new_G = nx.relabel_nodes(new_G, mapping)
-
-    new_cluster_dict = copy.deepcopy(cluster_dict)
-    for val in new_cluster_dict[n2]:
-        new_cluster_dict[n1].append(val)
-    del new_cluster_dict[n2]
-
-    keys, values = zip(*new_cluster_dict.items())
-    keys = list(keys)
-    for (i, key) in enumerate(keys):
-        keys[i] = key - 1 if key >= n2 else key
-    new_cluster_dict = dict(zip(keys, values))
-
-    new_vap_list = copy.deepcopy(vap_list)
-    new_vap_list[n1] += new_vap_list[n2]
-    # new_vap_list[n2] = 0
-    new_vap_list = np.delete(new_vap_list, n2)
-    return cluster_ct, new_G, new_vap_list, new_cluster_dict
-
-
 def check_valid(cluster_dict, target_districts):
     T = sum(data[1] for data in cluster_dict.values()) / target_districts
     for _, pop in cluster_dict.values():
@@ -110,10 +83,12 @@ def check_valid(cluster_dict, target_districts):
             return False
     return True
 
+
 def check_indexing(g, cluster_dict):
     s1 = set(g.nodes)
     s2 = set(cluster_dict.keys())
     return s1 == s2
+
 
 def recursive_clustering(cluster_dict, cluster_ct, G, target_districts, attempt_limit, start_time):
     # base case, checks if final clustering is valid
@@ -127,18 +102,11 @@ def recursive_clustering(cluster_dict, cluster_ct, G, target_districts, attempt_
     if (end_early):
         return cluster_dict, False
 
-    # Makes copies to save old values
-    """
-    old_G = copy.deepcopy(G)
-    old_vap_list = copy.deepcopy(vap_list)
-    old_cluster_ct = copy.deepcopy(cluster_ct)
-    old_cluster_dict = copy.deepcopy(cluster_dict)
-    """
     tried_pairs = []
 
     # Selects one pair to merge and merges them, adds it to tried merges
     row_num, col_num = get_merged_row_col(dissim)
-    i, j =  node_indexing[row_num], node_indexing[col_num]
+    i, j = node_indexing[row_num], node_indexing[col_num]
     attempt_ct = 0
     tried_pairs.append((row_num, col_num))
 
@@ -169,20 +137,6 @@ def recursive_clustering(cluster_dict, cluster_ct, G, target_districts, attempt_
         # Since the last attempt led to a failed clustering, let's pick a new merge at the current level
         row_num, col_num = get_merged_row_col(dissim)
         i, j = node_indexing[row_num], node_indexing[col_num]
-
-        """
-        curr_count = 0
-        while True:
-            if curr_count > len(possible_choices) / 2:  # no more possible merges at current stage possible
-                return old_cluster_dict, False
-            if (row_num, col_num) in tried_pairs:
-                row_num, col_num = get_merged_row_col(dissim)
-                curr_count += 1
-            else:
-                break
-        """
-        # perform actual merge
-
     return new_cluster_dict, False
 
 
@@ -213,13 +167,19 @@ def write_dict_to_file(sample_list, writer):
         # print(line)
         np.savetxt(writer, line)
 
-def sampling(cluster_dict_init, G, target_districts):
+
+def sampling(cluster_dict_init, G, target_districts, seed):
+    np.random.seed(seed)
+    random.seed(seed)
     cluster_dict = copy.deepcopy(cluster_dict_init)
     cluster_ct = len(cluster_dict.keys())
     start_time = time.time()
 
     cluster_dict, val = recursive_clustering(cluster_dict, cluster_ct, G, target_districts, 10, start_time)
+    if not val:
+        return None
     return cluster_dict
+
 
 # files = ['data/fl25', 'data/fl70', 'data/fl250', 'data/iowa']
 # vap for iowa = 7, t_d = 4
@@ -247,10 +207,11 @@ def main():
         for i, row in enumerate(reader):
             cluster_dict_init[str(i)] = ([i], int(row[pop_column]))
 
-        args = [(cluster_dict_init, G, target_districts) for _ in range(total_samples)]
+        args = [(cluster_dict_init, G, target_districts, i) for i in range(total_samples)]
         with Pool(N_CPU) as pool:
             sample_list = pool.starmap(sampling, args)
 
+    sample_list = list(filter(lambda x: x is not None, sample_list))
     valid_ct = len(sample_list)
     write_dict_to_file(sample_list, writer)
     writer.close()

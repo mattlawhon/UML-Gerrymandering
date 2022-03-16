@@ -68,7 +68,7 @@ def recovery(i, j, data_i, data_j, cluster_dict):
 def merge(i, j, G, cluster_dict):
     data_i = cluster_dict[i]
     data_j = cluster_dict[j]
-    G = nx.contracted_edge(G, (i, j), self_loops=False, copy=True)
+    G = nx.contracted_edge(G, (i, j), self_loops=False)
     cluster_dict[i] = (cluster_dict[i][0] + cluster_dict[j][0], cluster_dict[i][1] + cluster_dict[j][1])
     del cluster_dict[j]
     return G, data_i, data_j
